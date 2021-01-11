@@ -1,0 +1,63 @@
+
+# Docker Version: 1.13.0
+# Docker Compose Version: 1.10.1
+#
+
+version: "3"
+
+services:
+    mn2:
+      image: happysorry/mncse2
+      deploy:
+        replicas: 1
+      environment:
+        remoteCSEIP: 140.116.247.73
+        outport: 8282
+            
+      ports:
+        - "8282:8282"
+
+    mn1:
+      image: happysorry/mncse1:mncse22
+      depends_on: 
+        - mn2
+      deploy:
+        replicas: 1
+      environment:
+        remoteCSEIP: mn2
+        cseBaseAddress: mn1
+        remotePort: 8282
+        outport: 828
+        remoteCseId: mn-cse
+        remoteCseName: mn-name
+
+      ports:
+        - "828:828"
+
+    mnae1:
+      image: happysorry/mnae1
+      depends_on: 
+        - mn1
+      deploy:
+        replicas: 1
+      environment:
+        IP: mn1
+        outport: 828
+    
+    mnae2:
+      image: happysorry/mnae2
+      depends_on: 
+        - mn2
+      deploy:
+        replicas: 1
+      environment:
+        IP: mn2
+        outport: 8282
+    
+
+    haproxy:
+        image: haproxy:2.2
+        volumes:
+            - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+        ports:
+            - "80:80"

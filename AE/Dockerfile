@@ -1,0 +1,37 @@
+FROM openjdk:8-jdk-alpine
+
+#copy file into docker
+COPY / /tmp/file 
+RUN mv /tmp/file     /AE
+
+# RUN chmod +x /AE/AE.java
+# COPY target/products/mn-cse/ /tmp/mncse
+# RUN  mv /tmp/mncse/*/*/* /mncse
+
+# set env variable
+ENV IP IP
+ENV outport outport
+ENV server server
+WORKDIR /AE/
+
+RUN echo "#!/bin/sh"  >> /startFromDocker.sh
+
+RUN echo 'sed -i "s/140.116.247.73/$server/g" /AE/AE.java'  >> /startFromDocker.sh
+RUN echo 'sed -i "s/192.168.99.101/$IP/g" /AE/AE.java'  >> /startFromDocker.sh
+RUN echo 'sed -i "s/8282/$outport/g" /AE/AE.java'  >> /startFromDocker.sh
+RUN echo 'sed -i "s/192.168.99.101/$IP/g" /AE/http_server.java'  >> /startFromDocker.sh
+
+
+# RUN echo "javac create_AE.java" >> /startFromDocker.sh
+# RUN echo "javac create_container.java" >> /startFromDocker.sh
+# RUN echo "javac discovery_mn.java" >> /startFromDocker.sh
+
+# RUN echo "javac AE.java" >> /startFromDocker.sh
+RUN echo "javac http_server.java" >> /startFromDocker.sh
+
+RUN echo 'nohup java http_server &' >> /startFromDocker.sh
+# RUN echo 'java AE' >> /startFromDocker.sh
+RUN echo 'top' >>/startFromDocker.sh
+
+RUN chmod +x /startFromDocker.sh
+CMD ["/startFromDocker.sh"]
